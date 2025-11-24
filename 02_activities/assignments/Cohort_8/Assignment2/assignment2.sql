@@ -147,7 +147,8 @@ WITH totals AS (
 
 SELECT 
     market_date,
-    total_sales
+    total_sales,
+	'Best Day' as description
 FROM totals
 WHERE total_sales = (SELECT MAX(total_sales) FROM totals)
 
@@ -155,7 +156,8 @@ UNION
 
 SELECT 
     market_date,
-    total_sales
+    total_sales,
+	'Worst Day' as description
 FROM totals
 WHERE total_sales = (SELECT MIN(total_sales) FROM totals);
 
@@ -172,12 +174,13 @@ Think a bit about the row counts: how many distinct vendors, product names are t
 How many customers are there (y). 
 Before your final group by you should have the product of those two queries (x*y).  */
 
-select distinct customer_first_name , customer_last_name, vendor_owner_first_name, v.vendor_id, product_id, original_price, 5 * original_price as profit 
-from vendor_inventory vi
-CROSS JOIN customer 
-inner join vendor v 
-on v.vendor_id = vi.vendor_id
-order by v.vendor_id, product_id;
+SELECT DISTINCT vendor_name, v.vendor_id, product_name, 5 * original_price * customer_no AS revenue 
+FROM vendor_inventory vi
+INNER JOIN vendor v ON vi.vendor_id = v.vendor_id
+INNER JOIN product p ON vi.product_id = p.product_id
+CROSS JOIN
+	(SELECT COUNT(*) AS customer_no FROM customer) 
+ORDER BY v.vendor_name, p.product_name;
 
 -- INSERT
 /*1.  Create a new table "product_units". 
